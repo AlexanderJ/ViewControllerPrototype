@@ -8,12 +8,27 @@
 import UIKit
 import SwiftUI
 
+func produceValues(prefix: String) -> [String] {
+    (0..<30).map { "\(prefix) \($0) \(UUID().uuidString)" }
+}
+
 class SearchParameters: ObservableObject {
     @Published var filter: String
+    @Published var values = produceValues(prefix: "Text")
     
     init(filter: String = "") {
         self.filter = filter
     }
+}
+
+protocol TestDataA {
+    var textA: String { get }
+}
+
+class TestData: ObservableObject {
+    var textA = "textA"
+    var textB = "textB"
+    var textC = "textC"
 }
 
 class ViewController: UIViewController, UISearchControllerDelegate, UISearchBarDelegate {
@@ -22,7 +37,8 @@ class ViewController: UIViewController, UISearchControllerDelegate, UISearchBarD
     override func viewDidLoad() {
         super.viewDidLoad()
                 
-        let hostingController = UIHostingController(rootView: DummyView(searchParameters: searchParameters))
+        let hostingController = UIHostingController(rootView: DummyView(searchParameters: searchParameters)
+            .environmentObject(TestData()))
 
         //let searchBar = searchController.searchBar
         //searchBar.sizeToFit()
@@ -66,6 +82,7 @@ class ViewController: UIViewController, UISearchControllerDelegate, UISearchBarD
     
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         print("search")
+        searchParameters.values = produceValues(prefix: searchParameters.filter)
     }
 }
 
